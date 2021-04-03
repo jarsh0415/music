@@ -1,0 +1,35 @@
+import re   # python 的正則庫
+import requests     # python 的requests庫
+
+songId = []         # 用來儲存每首歌對應的數字
+songName = []       # 用來儲存每首歌的名字
+
+# 這裡先下載5頁的歌曲
+for n in range(0, 5):
+    # 字串的格式化 n 代替 {}
+    url = 'http://www.htqyy.com/top/musicList/hot?pageIndex={}&pageSize=20'.format(n)
+    print(url, end='\n')
+    # 模擬瀏覽器請求，拿到html程式碼
+    html = requests.get(url)
+    # 用正則表示式捕獲 數字， （）內為捕獲的內容 .*? 為任何內容
+    resultId = re.findall('sid="(.*?)">', html.text)
+    # 用正則表示式捕獲 歌名
+    resultName = re.findall('<a href=".*?" target="play" title="(.*?)" sid=".*?">', html.text)
+    # 存進陣列
+    songId.extend(resultId)
+    songName.extend(resultName)
+print(songId)
+print(songName)
+
+
+for m in range(0, len(songId)):
+    # 字串的格式化 m 代替 {}
+    songUrl = 'http://f2.htqyy.com/play7/{}/mp3/5'.format(songId[m])
+    print(songUrl, end='\n')
+    print('正在下載第{}首。。。'.format(m+1))
+    # 得到返回資源的內容
+    response = requests.get(songUrl).content
+    # 以二進位制的形式寫入檔案中
+    f = open('E:\\music\\{}.mp3'.format(songName[m]), 'wb')
+    f.write(response)
+    f.close()
